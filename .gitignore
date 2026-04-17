@@ -102,6 +102,9 @@ lint/reports/
 node_modules/*
 /ci-actions/compose-stability/ivy-compose-stability-report.txt
 
+# Claude Code
+.claude/settings.local.json
+
 # Kotlin Compiler
 .kotlin/sessions/*
 /.idea/AndroidProjectSystem.xml
