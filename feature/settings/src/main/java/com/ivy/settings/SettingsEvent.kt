@@ -19,4 +19,9 @@ sealed interface SettingsEvent {
     data object DeleteCloudUserData : SettingsEvent
     data object DeleteAllUserData : SettingsEvent
     data object SwitchLanguage : SettingsEvent
+    data class SetGitHubOwner(val owner: String) : SettingsEvent
+    data class SetGitHubRepo(val repo: String) : SettingsEvent
+    data class SetGitHubPat(val pat: String) : SettingsEvent
+    data class SetGitHubAutoBackupEnabled(val enabled: Boolean) : SettingsEvent
+    data object TriggerGitHubBackupNow : SettingsEvent
 }

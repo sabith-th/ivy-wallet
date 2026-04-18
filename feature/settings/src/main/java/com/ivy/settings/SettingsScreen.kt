@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,6 +34,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -136,7 +139,22 @@ fun BoxWithConstraintsScope.SettingsScreen() {
         },
         onSwitchLanguage = {
             viewModel.onEvent(SettingsEvent.SwitchLanguage)
-        }
+        },
+        githubOwner = uiState.githubOwner,
+        githubRepo = uiState.githubRepo,
+        githubPat = uiState.githubPat,
+        githubAutoBackupEnabled = uiState.githubAutoBackupEnabled,
+        githubLastBackupTimestamp = uiState.githubLastBackupTimestamp,
+        githubBackupProgress = uiState.githubBackupProgress,
+        onSetGitHubOwner = { viewModel.onEvent(SettingsEvent.SetGitHubOwner(it)) },
+        onSetGitHubRepo = { viewModel.onEvent(SettingsEvent.SetGitHubRepo(it)) },
+        onSetGitHubPat = { viewModel.onEvent(SettingsEvent.SetGitHubPat(it)) },
+        onSetGitHubAutoBackupEnabled = {
+            viewModel.onEvent(SettingsEvent.SetGitHubAutoBackupEnabled(it))
+        },
+        onTriggerGitHubBackupNow = {
+            viewModel.onEvent(SettingsEvent.TriggerGitHubBackupNow)
+        },
     )
 }
 
@@ -168,7 +186,18 @@ private fun BoxWithConstraintsScope.UI(
     onSetStartDateOfMonth: (Int) -> Unit = {},
     onDeleteAllUserData: () -> Unit = {},
     onDeleteCloudUserData: () -> Unit = {},
-    onSwitchLanguage: () -> Unit = {}
+    onSwitchLanguage: () -> Unit = {},
+    githubOwner: String = "",
+    githubRepo: String = "",
+    githubPat: String = "",
+    githubAutoBackupEnabled: Boolean = false,
+    githubLastBackupTimestamp: Long = 0L,
+    githubBackupProgress: Boolean = false,
+    onSetGitHubOwner: (String) -> Unit = {},
+    onSetGitHubRepo: (String) -> Unit = {},
+    onSetGitHubPat: (String) -> Unit = {},
+    onSetGitHubAutoBackupEnabled: (Boolean) -> Unit = {},
+    onTriggerGitHubBackupNow: () -> Unit = {},
 ) {
     var currencyModalVisible by remember { mutableStateOf(false) }
     var nameModalVisible by remember { mutableStateOf(false) }
@@ -270,6 +299,22 @@ private fun BoxWithConstraintsScope.UI(
                     )
                 )
             }
+        }
+
+        item {
+            GitHubBackupSection(
+                owner = githubOwner,
+                repo = githubRepo,
+                pat = githubPat,
+                enabled = githubAutoBackupEnabled,
+                lastBackupTimestamp = githubLastBackupTimestamp,
+                backupInProgress = githubBackupProgress,
+                onSetOwner = onSetGitHubOwner,
+                onSetRepo = onSetGitHubRepo,
+                onSetPat = onSetGitHubPat,
+                onSetEnabled = onSetGitHubAutoBackupEnabled,
+                onBackupNow = onTriggerGitHubBackupNow,
+            )
         }
 
         item {
@@ -1167,6 +1212,104 @@ private fun SettingsDefaultButton(
         description = description
     ) {
         onClick()
+    }
+}
+
+@Composable
+@Suppress("LongParameterList")
+private fun GitHubBackupSection(
+    owner: String,
+    repo: String,
+    pat: String,
+    enabled: Boolean,
+    lastBackupTimestamp: Long,
+    backupInProgress: Boolean,
+    onSetOwner: (String) -> Unit,
+    onSetRepo: (String) -> Unit,
+    onSetPat: (String) -> Unit,
+    onSetEnabled: (Boolean) -> Unit,
+    onBackupNow: () -> Unit,
+) {
+    SettingsSectionDivider(text = "GitHub Auto-Backup")
+
+    Spacer(Modifier.height(16.dp))
+
+    AppSwitch(
+        lockApp = enabled,
+        onSetLockApp = onSetEnabled,
+        text = "Enable GitHub Auto-Backup",
+        icon = R.drawable.ic_vue_security_shield,
+        description = "Daily backup of your data to a GitHub repository",
+    )
+
+    if (enabled) {
+        Spacer(Modifier.height(12.dp))
+
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
+                .clip(UI.shapes.r2)
+                .background(UI.colors.medium, UI.shapes.r2)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = owner,
+                onValueChange = onSetOwner,
+                label = { Text("GitHub Owner (username or org)") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = repo,
+                onValueChange = onSetRepo,
+                label = { Text("Repository name") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = pat,
+                onValueChange = onSetPat,
+                label = { Text("Personal Access Token") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            )
+
+            if (lastBackupTimestamp > 0L) {
+                Spacer(Modifier.height(8.dp))
+                val date = java.text.SimpleDateFormat(
+                    "yyyy-MM-dd HH:mm",
+                    java.util.Locale.getDefault()
+                ).format(java.util.Date(lastBackupTimestamp))
+                Text(
+                    text = "Last backup: $date",
+                    style = UI.typo.nB2.style(
+                        color = Gray,
+                        fontWeight = FontWeight.Normal
+                    ).copy(fontSize = 14.sp)
+                )
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        SettingsPrimaryButton(
+            icon = R.drawable.ic_vue_security_shield,
+            text = if (backupInProgress) "Backing up…" else "Backup Now",
+            backgroundGradient = GradientIvy,
+            iconPadding = 8.dp,
+        ) {
+            if (!backupInProgress) onBackupNow()
+        }
     }
 }
 

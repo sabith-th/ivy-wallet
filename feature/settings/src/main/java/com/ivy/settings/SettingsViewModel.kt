@@ -16,6 +16,7 @@ import com.ivy.base.legacy.SharedPrefs
 import com.ivy.base.legacy.Theme
 import com.ivy.base.legacy.refreshWidget
 import com.ivy.data.backup.BackupDataUseCase
+import com.ivy.data.backup.GitHubBackupUseCase
 import com.ivy.data.db.dao.read.SettingsDao
 import com.ivy.data.db.dao.write.WriteSettingsDao
 import com.ivy.data.model.primitive.AssetCode
@@ -57,6 +58,7 @@ class SettingsViewModel @Inject constructor(
     private val updateSettingsAct: UpdateSettingsAct,
     private val settingsWriter: WriteSettingsDao,
     private val exportCsvUseCase: ExportCsvUseCase,
+    private val gitHubBackupUseCase: GitHubBackupUseCase,
     @ApplicationContext private val context: Context
 ) : ComposeViewModel<SettingsState, SettingsEvent>() {
 
@@ -70,6 +72,12 @@ class SettingsViewModel @Inject constructor(
     private val treatTransfersAsIncomeExpense = mutableStateOf(false)
     private val startDateOfMonth = mutableIntStateOf(1)
     private val progressState = mutableStateOf(false)
+    private val githubOwner = mutableStateOf("")
+    private val githubRepo = mutableStateOf("")
+    private val githubPat = mutableStateOf("")
+    private val githubAutoBackupEnabled = mutableStateOf(false)
+    private val githubLastBackupTimestamp = mutableStateOf(0L)
+    private val githubBackupProgress = mutableStateOf(false)
 
     @Composable
     override fun uiState(): SettingsState {
@@ -88,7 +96,13 @@ class SettingsViewModel @Inject constructor(
             startDateOfMonth = getStartDateOfMonth(),
             progressState = getProgressState(),
             hideIncome = getHideIncome(),
-            languageOptionVisible = isLanguageOptionVisible()
+            languageOptionVisible = isLanguageOptionVisible(),
+            githubOwner = githubOwner.value,
+            githubRepo = githubRepo.value,
+            githubPat = githubPat.value,
+            githubAutoBackupEnabled = githubAutoBackupEnabled.value,
+            githubLastBackupTimestamp = githubLastBackupTimestamp.value,
+            githubBackupProgress = githubBackupProgress.value,
         )
     }
 
@@ -102,6 +116,7 @@ class SettingsViewModel @Inject constructor(
         initializeHideIncome()
         initializeTransfersAsIncomeExpense()
         initializeStartDateOfMonth()
+        initializeGitHubBackup()
     }
 
     private suspend fun initializeCurrency() {
@@ -151,6 +166,15 @@ class SettingsViewModel @Inject constructor(
 
     private suspend fun initializeStartDateOfMonth() {
         startDateOfMonth.intValue = startDayOfMonthAct(Unit)
+    }
+
+    private suspend fun initializeGitHubBackup() {
+        val config = gitHubBackupUseCase.getConfig()
+        githubOwner.value = config.owner
+        githubRepo.value = config.repo
+        githubPat.value = config.pat
+        githubAutoBackupEnabled.value = config.enabled
+        githubLastBackupTimestamp.value = config.lastBackupTimestamp
     }
 
     @Composable
@@ -233,6 +257,11 @@ class SettingsViewModel @Inject constructor(
             SettingsEvent.DeleteCloudUserData -> deleteCloudUserData()
             SettingsEvent.DeleteAllUserData -> deleteAllUserData()
             SettingsEvent.SwitchLanguage -> switchLanguage()
+            is SettingsEvent.SetGitHubOwner -> setGitHubOwner(event.owner)
+            is SettingsEvent.SetGitHubRepo -> setGitHubRepo(event.repo)
+            is SettingsEvent.SetGitHubPat -> setGitHubPat(event.pat)
+            is SettingsEvent.SetGitHubAutoBackupEnabled -> setGitHubAutoBackupEnabled(event.enabled)
+            SettingsEvent.TriggerGitHubBackupNow -> triggerGitHubBackupNow()
         }
     }
 
@@ -394,6 +423,50 @@ class SettingsViewModel @Inject constructor(
     private fun logout() {
         viewModelScope.launch {
             logoutLogic.logout()
+        }
+    }
+
+    private fun setGitHubOwner(owner: String) {
+        githubOwner.value = owner
+        saveGitHubConfig()
+    }
+
+    private fun setGitHubRepo(repo: String) {
+        githubRepo.value = repo
+        saveGitHubConfig()
+    }
+
+    private fun setGitHubPat(pat: String) {
+        githubPat.value = pat
+        saveGitHubConfig()
+    }
+
+    private fun setGitHubAutoBackupEnabled(enabled: Boolean) {
+        githubAutoBackupEnabled.value = enabled
+        saveGitHubConfig()
+    }
+
+    private fun saveGitHubConfig() {
+        viewModelScope.launch {
+            gitHubBackupUseCase.saveConfig(
+                com.ivy.data.backup.GitHubBackupConfig(
+                    owner = githubOwner.value,
+                    repo = githubRepo.value,
+                    pat = githubPat.value,
+                    enabled = githubAutoBackupEnabled.value,
+                    lastBackupTimestamp = githubLastBackupTimestamp.value,
+                )
+            )
+        }
+    }
+
+    private fun triggerGitHubBackupNow() {
+        viewModelScope.launch(Dispatchers.IO) {
+            githubBackupProgress.value = true
+            gitHubBackupUseCase.performBackup().onSuccess {
+                githubLastBackupTimestamp.value = System.currentTimeMillis()
+            }
+            githubBackupProgress.value = false
         }
     }
 

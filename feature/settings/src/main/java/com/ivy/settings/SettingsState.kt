@@ -13,5 +13,11 @@ data class SettingsState(
     val treatTransfersAsIncomeExpense: Boolean,
     val startDateOfMonth: String,
     val progressState: Boolean,
-    val languageOptionVisible: Boolean
+    val languageOptionVisible: Boolean,
+    val githubOwner: String,
+    val githubRepo: String,
+    val githubPat: String,
+    val githubAutoBackupEnabled: Boolean,
+    val githubLastBackupTimestamp: Long,
+    val githubBackupProgress: Boolean,
 )
