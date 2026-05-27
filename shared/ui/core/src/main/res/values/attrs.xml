@@ -1,0 +1,5 @@
+<resources>
+    <!-- Declare Material/AppCompat theme attribute so AAPT2 VerifyLibraryResources
+         can resolve ?attr/colorControlNormal references in this module's drawables. -->
+    <attr name="colorControlNormal" format="color"/>
+</resources>
