@@ -1,0 +1,81 @@
+name: Personal Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Get version info
+        id: version
+        run: |
+          VERSION_NAME=$(grep 'version-name =' gradle/libs.versions.toml | awk -F'"' '{print $2}')
+          VERSION_CODE=$(grep 'version-code =' gradle/libs.versions.toml | awk -F'"' '{print $2}')
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          TAG="v${VERSION_NAME}-${VERSION_CODE}-${SHORT_SHA}"
+          echo "name=${VERSION_NAME}" >> $GITHUB_OUTPUT
+          echo "code=${VERSION_CODE}" >> $GITHUB_OUTPUT
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+      - name: Decode keystore
+        run: echo "${{ secrets.SIGNING_KEYSTORE }}" | base64 -d > sign.jks
+
+      - name: Build signed release APK
+        run: ./gradlew assembleRelease
+        env:
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            LOG=$(git log --oneline -20 --no-merges)
+          else
+            LOG=$(git log --oneline --no-merges "${LAST_TAG}..HEAD")
+          fi
+          if [ -z "$LOG" ]; then
+            LOG="No changes since last release."
+          fi
+          {
+            echo 'CHANGELOG<<ENDOFCHANGELOG'
+            echo "$LOG"
+            echo 'ENDOFCHANGELOG'
+          } >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: v${{ steps.version.outputs.name }} (${{ steps.version.outputs.code }})
+          body: |
+            ## Changes
+            ${{ env.CHANGELOG }}
+
+            ---
+            **Version:** ${{ steps.version.outputs.name }} (code ${{ steps.version.outputs.code }})
+            **Commit:** ${{ github.sha }}
+          files: app/build/outputs/apk/release/app-release.apk
+          make_latest: true
