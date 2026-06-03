@@ -66,6 +66,9 @@ jobs:
             echo 'ENDOFCHANGELOG'
           } >> $GITHUB_ENV
 
+      - name: Rename APK
+        run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/ivy-wallet.apk
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -78,5 +81,5 @@ jobs:
             ---
             **Version:** ${{ steps.version.outputs.name }} (code ${{ steps.version.outputs.code }})
             **Commit:** ${{ github.sha }}
-          files: app/build/outputs/apk/release/app-release.apk
+          files: app/build/outputs/apk/release/ivy-wallet.apk
           make_latest: true
