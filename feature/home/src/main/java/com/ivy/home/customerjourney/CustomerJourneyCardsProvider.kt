@@ -165,6 +165,7 @@ class CustomerJourneyCardsProvider @Inject constructor(
       id = "vote_card",
       // to users that haven't voted
       condition = { trnCount, _, _, deps ->
+        @Suppress("MagicNumber")
         val expiry = LocalDate.of(2025, 7, 28)
         trnCount > 3 &&
             // set expiration

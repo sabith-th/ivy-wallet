@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.ivy.base.legacy.SharedPrefs
@@ -76,7 +77,7 @@ class SettingsViewModel @Inject constructor(
     private val githubRepo = mutableStateOf("")
     private val githubPat = mutableStateOf("")
     private val githubAutoBackupEnabled = mutableStateOf(false)
-    private val githubLastBackupTimestamp = mutableStateOf(0L)
+    private val githubLastBackupTimestamp = mutableLongStateOf(0L)
     private val githubBackupProgress = mutableStateOf(false)
 
     @Composable

@@ -154,7 +154,7 @@ fun BoxWithConstraintsScope.SettingsScreen() {
         onSetGitHubOwner = { viewModel.onEvent(SettingsEvent.SetGitHubOwner(it)) },
         onSetGitHubRepo = { viewModel.onEvent(SettingsEvent.SetGitHubRepo(it)) },
         onSetGitHubPat = { viewModel.onEvent(SettingsEvent.SetGitHubPat(it)) },
-        onSetGitHubAutoBackupEnabled = {
+        onSetGitHubAutoBackupEnable = {
             viewModel.onEvent(SettingsEvent.SetGitHubAutoBackupEnabled(it))
         },
         onTriggerGitHubBackupNow = {
@@ -201,7 +201,7 @@ private fun BoxWithConstraintsScope.UI(
     onSetGitHubOwner: (String) -> Unit = {},
     onSetGitHubRepo: (String) -> Unit = {},
     onSetGitHubPat: (String) -> Unit = {},
-    onSetGitHubAutoBackupEnabled: (Boolean) -> Unit = {},
+    onSetGitHubAutoBackupEnable: (Boolean) -> Unit = {},
     onTriggerGitHubBackupNow: () -> Unit = {},
 ) {
     var currencyModalVisible by remember { mutableStateOf(false) }
@@ -317,7 +317,7 @@ private fun BoxWithConstraintsScope.UI(
                 onSetOwner = onSetGitHubOwner,
                 onSetRepo = onSetGitHubRepo,
                 onSetPat = onSetGitHubPat,
-                onSetEnabled = onSetGitHubAutoBackupEnabled,
+                onSetEnable = onSetGitHubAutoBackupEnable,
                 onBackupNow = onTriggerGitHubBackupNow,
             )
         }
@@ -1221,7 +1221,7 @@ private fun SettingsDefaultButton(
 }
 
 @Composable
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "ComposeMultipleContentEmitters")
 private fun GitHubBackupSection(
     owner: String,
     repo: String,
@@ -1232,7 +1232,7 @@ private fun GitHubBackupSection(
     onSetOwner: (String) -> Unit,
     onSetRepo: (String) -> Unit,
     onSetPat: (String) -> Unit,
-    onSetEnabled: (Boolean) -> Unit,
+    onSetEnable: (Boolean) -> Unit,
     onBackupNow: () -> Unit,
 ) {
     SettingsSectionDivider(text = "GitHub Auto-Backup")
@@ -1241,7 +1241,7 @@ private fun GitHubBackupSection(
 
     AppSwitch(
         lockApp = enabled,
-        onSetLockApp = onSetEnabled,
+        onSetLockApp = onSetEnable,
         text = "Enable GitHub Auto-Backup",
         icon = R.drawable.ic_vue_security_shield,
         description = "Daily backup of your data to a GitHub repository",
