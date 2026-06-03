@@ -1,6 +1,5 @@
 package com.ivy.settings
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.PowerManager
@@ -1222,8 +1221,7 @@ private fun SettingsDefaultButton(
 }
 
 @Composable
-@Suppress("LongParameterList")
-@SuppressLint("ComposeMultipleContentEmitters")
+@Suppress("LongParameterList", "ContentEmitterReturningValues")
 private fun GitHubBackupSection(
     owner: String,
     repo: String,
