@@ -1221,7 +1221,7 @@ private fun SettingsDefaultButton(
 }
 
 @Composable
-@Suppress("LongParameterList", "ContentEmitterReturningValues")
+@Suppress("LongParameterList", "MultipleEmitters")
 private fun GitHubBackupSection(
     owner: String,
     repo: String,
