@@ -29,8 +29,8 @@ jobs:
       - name: Get version info
         id: version
         run: |
-          VERSION_NAME=$(grep 'version-name =' gradle/libs.versions.toml | awk -F'"' '{print $2}')
-          VERSION_CODE=$(grep 'version-code =' gradle/libs.versions.toml | awk -F'"' '{print $2}')
+          VERSION_NAME=$(date +'%Y.%m.%d')
+          VERSION_CODE=${{ github.run_number }}
           SHORT_SHA=$(git rev-parse --short HEAD)
           TAG="v${VERSION_NAME}-${VERSION_CODE}-${SHORT_SHA}"
           echo "name=${VERSION_NAME}" >> $GITHUB_OUTPUT
@@ -41,7 +41,7 @@ jobs:
         run: echo "${{ secrets.SIGNING_KEYSTORE }}" | base64 -d > sign.jks
 
       - name: Build signed release APK
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleRelease -Pivy.versionName=${{ steps.version.outputs.name }} -Pivy.versionCode=${{ steps.version.outputs.code }}
         env:
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}

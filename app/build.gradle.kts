@@ -19,8 +19,10 @@ android {
         applicationId = "com.ivy.wallet"
         minSdk = libs.versions.min.sdk.get().toInt()
         targetSdk = libs.versions.compile.sdk.get().toInt()
-        versionName = libs.versions.version.name.get()
-        versionCode = libs.versions.version.code.get().toInt()
+        versionName = (project.findProperty("ivy.versionName") as? String)
+            ?: libs.versions.version.name.get()
+        versionCode = ((project.findProperty("ivy.versionCode") as? String)?.toIntOrNull())
+            ?: libs.versions.version.code.get().toInt()
     }
 
     androidResources {
