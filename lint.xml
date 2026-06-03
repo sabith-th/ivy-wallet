@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!--
+        Slack compose-lints ParameterOrderDetector has an NPE bug (getText() must not be null)
+        that crashes lint analysis on composable functions with certain parameter patterns.
+        Disabled globally until the upstream library is fixed.
+        See: temp/old-design and temp/legacy-code (BackBottomBar.kt, IvyIcon.kt)
+    -->
+    <issue id="ComposeParameterOrder" severity="ignore"/>
+</lint>
