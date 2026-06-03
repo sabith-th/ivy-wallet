@@ -67,7 +67,7 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Rename APK
-        run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/ivy-wallet.apk
+        run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/ivy-wallet-${{ steps.version.outputs.name }}.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -81,5 +81,5 @@ jobs:
             ---
             **Version:** ${{ steps.version.outputs.name }} (code ${{ steps.version.outputs.code }})
             **Commit:** ${{ github.sha }}
-          files: app/build/outputs/apk/release/ivy-wallet.apk
+          files: app/build/outputs/apk/release/ivy-wallet-${{ steps.version.outputs.name }}.apk
           make_latest: true
