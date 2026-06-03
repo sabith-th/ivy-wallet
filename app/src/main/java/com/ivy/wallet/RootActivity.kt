@@ -10,6 +10,7 @@ import android.os.Environment
 import android.provider.DocumentsContract
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
@@ -95,6 +96,7 @@ class RootActivity : AppCompatActivity(), RootScreen {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setupApp()
+        setupBackHandler()
         setContent {
             val viewModel: RootViewModel = viewModel()
             val isSystemInDarkTheme = isSystemInDarkTheme()
@@ -152,6 +154,15 @@ class RootActivity : AppCompatActivity(), RootScreen {
                 dateTimePicker.Content()
             }
         }
+    }
+
+    private fun setupBackHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (!viewModel.isAppLocked() && navigation.onBackPressed()) return
+                moveTaskToBack(false)
+            }
+        })
     }
 
     private fun setupApp() {
@@ -344,16 +355,6 @@ class RootActivity : AppCompatActivity(), RootScreen {
             .build()
 
         biometricPrompt.authenticate(promptInfo)
-    }
-
-    override fun onBackPressed() {
-        if (viewModel.isAppLocked()) {
-            super.onBackPressed()
-        } else {
-            if (!navigation.onBackPressed()) {
-                super.onBackPressed()
-            }
-        }
     }
 
     @Suppress("TooGenericExceptionCaught", "PrintStackTrace")
