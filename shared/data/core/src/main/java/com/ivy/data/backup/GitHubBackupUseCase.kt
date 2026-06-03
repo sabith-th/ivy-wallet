@@ -77,13 +77,15 @@ class GitHubBackupUseCase @Inject constructor(
     }
 
     private fun scheduleAutoBackup() {
+        @Suppress("MagicNumber")
+        val backoffMinutes = 30L
         val request = PeriodicWorkRequestBuilder<GitHubAutoBackupWorker>(1, TimeUnit.DAYS)
             .setConstraints(
                 Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
                     .build()
             )
-            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.MINUTES)
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, backoffMinutes, TimeUnit.MINUTES)
             .build()
 
         workManager.enqueueUniquePeriodicWork(

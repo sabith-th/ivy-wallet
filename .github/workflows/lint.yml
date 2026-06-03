@@ -23,7 +23,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Lint (release)
-        run: ./gradlew lintRelease
+        run: ./gradlew lintRelease --no-configuration-cache
 
       - name: Upload Lint Release report to GitHub
         if: always()
