@@ -70,6 +70,13 @@ class GitHubBackupUseCase @Inject constructor(
         return result
     }
 
+    suspend fun ensureScheduled() {
+        val config = getConfig()
+        if (config.enabled && config.isValid()) {
+            scheduleAutoBackup()
+        }
+    }
+
     private fun scheduleAutoBackup() {
         val request = PeriodicWorkRequestBuilder<GitHubAutoBackupWorker>(1, TimeUnit.DAYS)
             .setConstraints(

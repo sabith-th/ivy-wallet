@@ -1,5 +1,9 @@
 package com.ivy.settings
 
+import android.content.Intent
+import android.net.Uri
+import android.os.PowerManager
+import android.provider.Settings
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -26,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -1309,6 +1314,26 @@ private fun GitHubBackupSection(
             iconPadding = 8.dp,
         ) {
             if (!backupInProgress) onBackupNow()
+        }
+
+        val context = LocalContext.current
+        val powerManager = context.getSystemService(PowerManager::class.java)
+        val isIgnoringBatteryOptimizations = powerManager
+            ?.isIgnoringBatteryOptimizations(context.packageName) == true
+        if (!isIgnoringBatteryOptimizations) {
+            Spacer(Modifier.height(8.dp))
+            SettingsPrimaryButton(
+                icon = R.drawable.ic_vue_security_shield,
+                text = "Disable battery optimization",
+                backgroundGradient = GradientGreen,
+                iconPadding = 8.dp,
+                description = "Required for reliable daily backups"
+            ) {
+                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                    data = Uri.parse("package:${context.packageName}")
+                }
+                context.startActivity(intent)
+            }
         }
     }
 }

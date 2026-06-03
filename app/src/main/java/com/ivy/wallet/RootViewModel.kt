@@ -8,6 +8,7 @@ import com.ivy.base.legacy.SharedPrefs
 import com.ivy.base.legacy.Theme
 import com.ivy.base.legacy.stringRes
 import com.ivy.base.model.TransactionType
+import com.ivy.data.backup.GitHubBackupUseCase
 import com.ivy.data.db.dao.read.SettingsDao
 import com.ivy.data.repository.LegalRepository
 import com.ivy.frp.test.TestIdlingResource
@@ -43,6 +44,7 @@ class RootViewModel @Inject constructor(
     private val transactionReminderLogic: TransactionReminderLogic,
     private val migrationsManager: MigrationsManager,
     private val legalRepo: LegalRepository,
+    private val gitHubBackupUseCase: GitHubBackupUseCase,
 ) : ViewModel() {
 
     companion object {
@@ -94,6 +96,10 @@ class RootViewModel @Inject constructor(
 
         viewModelScope.launch {
             migrationsManager.executeMigrations()
+        }
+
+        viewModelScope.launch {
+            gitHubBackupUseCase.ensureScheduled()
         }
     }
 
