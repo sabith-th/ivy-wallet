@@ -10,7 +10,6 @@ import androidx.work.WorkManager
 import com.ivy.data.datastore.DatastoreKeys
 import com.ivy.data.datastore.IvyDataStore
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -105,6 +104,6 @@ data class GitHubBackupConfig(
     val pat: String,
     val enabled: Boolean,
     val lastBackupTimestamp: Long,
-) {
-    fun isValid(): Boolean = owner.isNotBlank() && repo.isNotBlank() && pat.isNotBlank()
-}
+)
+
+fun GitHubBackupConfig.isValid(): Boolean = owner.isNotBlank() && repo.isNotBlank() && pat.isNotBlank()

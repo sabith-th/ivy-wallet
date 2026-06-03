@@ -4,6 +4,10 @@ plugins {
 
 android {
     namespace = "com.ivy.design"
+    lint {
+        // Slack compose-lints ParameterOrderDetector has an NPE bug on IvyIcon.kt
+        disable += "ComposeParameterOrder"
+    }
 }
 
 dependencies {

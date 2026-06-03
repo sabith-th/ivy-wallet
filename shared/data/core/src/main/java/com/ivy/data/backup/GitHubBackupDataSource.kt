@@ -82,5 +82,6 @@ private data class GitHubGetResponse(val sha: String)
 private data class GitHubPutRequest(
     val message: String,
     val content: String,
+    @Suppress("DataClassDefaultValues")
     val sha: String? = null,
 )

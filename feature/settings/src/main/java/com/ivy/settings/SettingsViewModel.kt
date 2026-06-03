@@ -257,11 +257,18 @@ class SettingsViewModel @Inject constructor(
             SettingsEvent.DeleteCloudUserData -> deleteCloudUserData()
             SettingsEvent.DeleteAllUserData -> deleteAllUserData()
             SettingsEvent.SwitchLanguage -> switchLanguage()
+            else -> onGitHubBackupEvent(event)
+        }
+    }
+
+    private fun onGitHubBackupEvent(event: SettingsEvent) {
+        when (event) {
             is SettingsEvent.SetGitHubOwner -> setGitHubOwner(event.owner)
             is SettingsEvent.SetGitHubRepo -> setGitHubRepo(event.repo)
             is SettingsEvent.SetGitHubPat -> setGitHubPat(event.pat)
             is SettingsEvent.SetGitHubAutoBackupEnabled -> setGitHubAutoBackupEnabled(event.enabled)
             SettingsEvent.TriggerGitHubBackupNow -> triggerGitHubBackupNow()
+            else -> Unit
         }
     }
 

@@ -157,12 +157,15 @@ class RootActivity : AppCompatActivity(), RootScreen {
     }
 
     private fun setupBackHandler() {
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (!viewModel.isAppLocked() && navigation.onBackPressed()) return
-                moveTaskToBack(false)
-            }
-        })
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (!viewModel.isAppLocked() && navigation.onBackPressed()) return
+                    moveTaskToBack(false)
+                }
+            },
+        )
     }
 
     private fun setupApp() {
