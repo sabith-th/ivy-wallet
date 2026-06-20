@@ -26,5 +26,16 @@ jobs:
           distribution: 'adopt'
           java-version: '18'
 
+      - name: Delete stale wrapper upgrade branches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api "repos/sabith-th/ivy-wallet/branches?per_page=100" \
+            --jq '.[].name | select(startswith("wrapperbot/"))' | \
+            while IFS= read -r branch; do
+              echo "Deleting stale branch: $branch"
+              gh api --method DELETE "repos/sabith-th/ivy-wallet/git/refs/heads/$branch" || true
+            done
+
       - name: Upgrade Gradle Wrapper
         run: ./gradlew upgradeGradleWrapperIvyWallet
