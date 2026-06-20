@@ -21,7 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ivy.base.legacy.Theme
-import com.ivy.design.utils.IvyComponentPreview
+import com.ivy.legacy.IvyWalletPreview
 import com.ivy.legacy.data.AppBaseData
 import com.ivy.legacy.ui.SearchInput
 import com.ivy.legacy.ui.component.transaction.transactions
@@ -50,7 +50,8 @@ fun SearchScreen(screen: SearchScreen) {
 @Composable
 private fun SearchUi(
     uiState: SearchState,
-    onEvent: (SearchEvent) -> Unit
+    onEvent: (SearchEvent) -> Unit,
+    focusOnSearch: Boolean = true
 ) {
     Column(
         modifier = Modifier
@@ -68,6 +69,7 @@ private fun SearchUi(
         SearchInput(
             searchQueryTextFieldValue = searchQueryTextFieldValue,
             hint = stringResource(R.string.search_transactions),
+            focus = focusOnSearch,
             showClearIcon = searchQueryTextFieldValue.text.isNotEmpty(),
             onSetSearchQueryTextField = {
                 searchQueryTextFieldValue = it
@@ -138,7 +140,10 @@ private fun Preview(isDark: Boolean = false) {
                 categories = persistentListOf(),
                 shouldShowAccountSpecificColorInTransactions = false
             ),
-            onEvent = {}
+            onEvent = {},
+            // Prevent FocusRequester from starting a HandlerThread in Paparazzi
+            // which crashes in LayoutLib 16.2.1 (NoSuchMethodError: setPosixNicenessInternal)
+            focusOnSearch = false
         )
     }
 }
@@ -148,7 +153,7 @@ private fun Preview(isDark: Boolean = false) {
 @Composable
 fun SearchUiTest(isDark: Boolean) {
     val theme = if (isDark) Theme.DARK else Theme.LIGHT
-    IvyComponentPreview(theme = theme) {
+    IvyWalletPreview(theme) {
         Preview(isDark)
     }
 }

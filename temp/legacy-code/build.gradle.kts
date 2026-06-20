@@ -7,6 +7,12 @@ android {
     namespace = "com.ivy.legacy"
 }
 
+// Same Compose compiler 2.1.21 IrSourcePrinterVisitor workaround as temp:old-design.
+composeCompiler {
+    reportsDestination.unset()
+    metricsDestination.unset()
+}
+
 dependencies {
     implementation(projects.shared.base)
     implementation(projects.shared.data.core)

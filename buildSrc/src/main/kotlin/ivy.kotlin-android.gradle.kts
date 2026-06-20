@@ -1,30 +1,32 @@
 plugins {
     id("com.android.library")
-    id("kotlin-android")
-    id("org.jetbrains.kotlin.android")
+    // AGP 9.2 auto-applies org.jetbrains.kotlin.android synchronously when
+    // com.android.library is applied, so no explicit KGP application is needed.
+    // Adding it to plugins{} would conflict with either the auto-apply (in real builds)
+    // or the kotlin-jvm from buildSrc's kotlin-dsl (during accessor generation).
 }
 
+val javaVersion = catalog.version("jvm-target")
+
 android {
-    // Kotlin
-    val javaVersion = catalog.version("jvm-target")
     compileOptions {
         sourceCompatibility = JavaVersion.valueOf("VERSION_$javaVersion")
         targetCompatibility = JavaVersion.valueOf("VERSION_$javaVersion")
     }
 
-    kotlinOptions {
-        jvmTarget = javaVersion
-    }
-
-    // Android
     compileSdk = catalog.version("compile-sdk").toInt()
     defaultConfig {
         minSdk = catalog.version("min-sdk").toInt()
     }
 }
 
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(javaVersion))
+    }
+}
+
 gradle.projectsEvaluated {
-    // Increase tests Heap Size because of Kotest property-based tests
     tasks.withType<Test> {
         maxHeapSize = "2048m"
     }

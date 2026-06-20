@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
-    id("kotlin-android")
-    id("org.jetbrains.kotlin.android")
+    // AGP 9.2 auto-applies org.jetbrains.kotlin.android when com.android.application
+    // is applied; an explicit declaration here would conflict with that auto-apply.
     org.jetbrains.kotlin.plugin.compose
     id("dagger.hilt.android.plugin")
     id("org.jetbrains.kotlin.plugin.serialization")
@@ -95,12 +95,8 @@ android {
         }
     }
 
-    val javaVersion = libs.versions.jvm.target.get()
-    kotlinOptions {
-        jvmTarget = javaVersion
-    }
-
     compileOptions {
+        val javaVersion = libs.versions.jvm.target.get()
         sourceCompatibility = JavaVersion.valueOf("VERSION_$javaVersion")
         targetCompatibility = JavaVersion.valueOf("VERSION_$javaVersion")
     }
@@ -108,6 +104,7 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        resValues = true
     }
 
     lint {
@@ -120,6 +117,12 @@ android {
         xmlReport = true
         xmlOutput = file("${project.rootDir}/build/reports/lint/lint.xml")
         baseline = file("lint-baseline.xml")
+    }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(libs.versions.jvm.target.get()))
     }
 }
 

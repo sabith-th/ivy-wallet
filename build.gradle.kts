@@ -8,29 +8,31 @@ plugins {
 
     alias(libs.plugins.gradleWrapperUpgrade)
 
-    alias(libs.plugins.koverPlugin)
+    // Kover 0.9.x uses TestResultsProvider.hasOutput(long, Destination) which was removed in
+    // Gradle 9. Disabled until a Kover release adds Gradle 9 support.
+    // alias(libs.plugins.koverPlugin)
 }
 
-subprojects {
-    apply(plugin = "org.jetbrains.kotlinx.kover")
-    kover {
-        reports {
-            filters {
-                excludes {
-                    classes(
-                        "*Activity",
-                        "*Activity\$*",
-                        "*.BuildConfig",
-                        "dagger.hilt.*",
-                        "hilt_aggregated_deps.*",
-                        "*.Hilt_*"
-                    )
-                    annotatedBy("@Composable")
-                }
-            }
-        }
-    }
-}
+// subprojects {
+//     apply(plugin = "org.jetbrains.kotlinx.kover")
+//     kover {
+//         reports {
+//             filters {
+//                 excludes {
+//                     classes(
+//                         "*Activity",
+//                         "*Activity\$*",
+//                         "*.BuildConfig",
+//                         "dagger.hilt.*",
+//                         "hilt_aggregated_deps.*",
+//                         "*.Hilt_*"
+//                     )
+//                     annotatedBy("@Composable")
+//                 }
+//             }
+//         }
+//     }
+// }
 
 wrapperUpgrade {
     gradle {

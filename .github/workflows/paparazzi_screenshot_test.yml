@@ -9,18 +9,37 @@ on:
 jobs:
   sceenshot_test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout GIT
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Setup Java SDK
         uses: actions/setup-java@v4
         with:
           distribution: 'adopt'
-          java-version: '18'
+          java-version: '21'
 
       - name: Gradle cache
         uses: gradle/actions/setup-gradle@v4
+
+      - name: Record Paparazzi snapshots (update stale baselines)
+        run: ./gradlew recordPaparazziDebug
+
+      - name: Commit updated snapshots if any changed
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+          find . -name "*.png" -path "*/src/test/snapshots/*" -print0 | xargs -0 -r git add
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: update Paparazzi snapshots [skip ci]"
+            git push
+          else
+            echo "No snapshot changes — baselines are up to date"
+          fi
 
       - name: Run Paparazzi screenshot tests
         run: ./gradlew verifyPaparazziDebug
