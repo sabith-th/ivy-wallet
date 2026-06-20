@@ -35,7 +35,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           find . -name "*.png" -path "*/src/test/snapshots/*" -print0 | xargs -0 -r git add
           if ! git diff --staged --quiet; then
-            git commit -m "chore: update Paparazzi snapshots"
+            git commit -m "chore: update Paparazzi snapshots [skip ci]"
             git push
           else
             echo "No snapshot changes — baselines are up to date"
