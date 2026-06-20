@@ -1,6 +1,6 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    // org.jetbrains.kotlin.android applied below; see ivy.kotlin-android.gradle.kts comment
     org.jetbrains.kotlin.plugin.compose
     id("dagger.hilt.android.plugin")
     id("org.jetbrains.kotlin.plugin.serialization")
@@ -9,6 +9,8 @@ plugins {
     id("com.google.firebase.crashlytics")
     id("io.gitlab.arturbosch.detekt")
 }
+
+pluginManager.apply("org.jetbrains.kotlin.android")
 
 android {
     namespace = "com.ivy.wallet"
@@ -118,7 +120,7 @@ android {
     }
 }
 
-kotlin {
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(libs.versions.jvm.target.get()))
     }
