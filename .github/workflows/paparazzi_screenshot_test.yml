@@ -33,7 +33,7 @@ jobs:
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-          find . -name "*.png" -path "*/src/test/snapshots/*" | xargs -r git add
+          find . -name "*.png" -path "*/src/test/snapshots/*" -print0 | xargs -0 -r git add
           if ! git diff --staged --quiet; then
             git commit -m "chore: update Paparazzi snapshots"
             git push
