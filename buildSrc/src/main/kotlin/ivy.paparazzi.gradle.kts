@@ -20,19 +20,3 @@ dependencies.constraints {
     }
 }
 
-// Paparazzi 2.0.0-alpha04 calls TestResultsProvider.hasOutput(long, Destination) when a
-// screenshot test fails. Gradle 9.6.0 removed that overload, causing NoSuchMethodError.
-// Keep Paparazzi tests out of testDebugUnitTest (which CI runs as the unit-test job) so
-// the removed API is never reached there. verifyPaparazziDebug / recordPaparazziDebug are
-// AGP-native tasks independent of testDebugUnitTest and still execute them correctly.
-afterEvaluate {
-    tasks.named<Test>("testDebugUnitTest") {
-        filter {
-            excludeTestsMatching("*PaparazziTest*")
-            excludeTestsMatching("*ScreenshotTest*")
-            // Modules with only Paparazzi tests would fail with "no tests found"
-            // after the exclusion. Allow empty test sets here.
-            isFailOnNoMatchingTests = false
-        }
-    }
-}
