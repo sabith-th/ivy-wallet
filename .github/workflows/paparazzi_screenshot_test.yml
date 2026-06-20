@@ -35,7 +35,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           git add --all "*/src/test/snapshots/"
           if ! git diff --staged --quiet; then
-            git commit -m "chore: update Paparazzi snapshots [skip ci]"
+            git commit -m "chore: update Paparazzi snapshots"
             git push
           else
             echo "No snapshot changes — baselines are up to date"

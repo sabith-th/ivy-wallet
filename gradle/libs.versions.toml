@@ -13,7 +13,7 @@ hilt = "2.59.2"
 room = "2.8.4"
 androidx-work = "2.9.1"
 kotlinx-collections = "0.3.7"
-paparazzi = "2.0.0-alpha04"
+paparazzi = "2.0.0-alpha05"
 
 # Android
 min-sdk = "28"
