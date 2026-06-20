@@ -50,7 +50,8 @@ fun SearchScreen(screen: SearchScreen) {
 @Composable
 private fun SearchUi(
     uiState: SearchState,
-    onEvent: (SearchEvent) -> Unit
+    onEvent: (SearchEvent) -> Unit,
+    focusOnSearch: Boolean = true
 ) {
     Column(
         modifier = Modifier
@@ -68,6 +69,7 @@ private fun SearchUi(
         SearchInput(
             searchQueryTextFieldValue = searchQueryTextFieldValue,
             hint = stringResource(R.string.search_transactions),
+            focus = focusOnSearch,
             showClearIcon = searchQueryTextFieldValue.text.isNotEmpty(),
             onSetSearchQueryTextField = {
                 searchQueryTextFieldValue = it
@@ -138,7 +140,10 @@ private fun Preview(isDark: Boolean = false) {
                 categories = persistentListOf(),
                 shouldShowAccountSpecificColorInTransactions = false
             ),
-            onEvent = {}
+            onEvent = {},
+            // Prevent FocusRequester from starting a HandlerThread in Paparazzi
+            // which crashes in LayoutLib 16.2.1 (NoSuchMethodError: setPosixNicenessInternal)
+            focusOnSearch = false
         )
     }
 }
