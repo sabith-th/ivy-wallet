@@ -30,6 +30,9 @@ afterEvaluate {
         filter {
             excludeTestsMatching("*PaparazziTest*")
             excludeTestsMatching("*ScreenshotTest*")
+            // Modules with only Paparazzi tests would fail with "no tests found"
+            // after the exclusion. Allow empty test sets here.
+            isFailOnNoMatchingTests = false
         }
     }
 }
