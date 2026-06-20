@@ -1,7 +1,14 @@
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    // org.jetbrains.kotlin.android is applied below in the body, not here.
+    // During generatePrecompiledScriptPluginAccessors, the synthetic project inherits
+    // kotlin-jvm from buildSrc's kotlin-dsl. Putting kotlin-android in plugins {}
+    // causes a name conflict on the 'kotlin' extension. Body code is not executed
+    // during accessor generation, so applying it here is safe.
 }
+
+// Must run before ivy.hilt and ivy.kotlinx-serialization are applied by ivy.module.
+pluginManager.apply("org.jetbrains.kotlin.android")
 
 val javaVersion = catalog.version("jvm-target")
 
@@ -17,14 +24,13 @@ android {
     }
 }
 
-kotlin {
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(javaVersion))
     }
 }
 
 gradle.projectsEvaluated {
-    // Increase tests Heap Size because of Kotest property-based tests
     tasks.withType<Test> {
         maxHeapSize = "2048m"
     }
