@@ -26,7 +26,23 @@ jobs:
           distribution: 'adopt'
           java-version: '18'
 
+      - name: Check for major version bump
+        id: version-check
+        run: |
+          CURRENT=$(grep -oP 'gradle-\K[\d.]+(?=-bin)' gradle/wrapper/gradle-wrapper.properties)
+          CURRENT_MAJOR=$(echo "$CURRENT" | cut -d. -f1)
+          LATEST=$(curl -s https://services.gradle.org/versions/current | python3 -c "import sys,json; print(json.load(sys.stdin)['version'])")
+          LATEST_MAJOR=$(echo "$LATEST" | cut -d. -f1)
+          echo "Current: $CURRENT (major $CURRENT_MAJOR), Latest: $LATEST (major $LATEST_MAJOR)"
+          if [ "$LATEST_MAJOR" -gt "$CURRENT_MAJOR" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping: major version bump ($CURRENT_MAJOR → $LATEST_MAJOR) requires manual migration."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Delete stale wrapper upgrade branches
+        if: steps.version-check.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -38,4 +54,5 @@ jobs:
             done
 
       - name: Upgrade Gradle Wrapper
+        if: steps.version-check.outputs.skip != 'true'
         run: ./gradlew upgradeGradleWrapperIvyWallet
