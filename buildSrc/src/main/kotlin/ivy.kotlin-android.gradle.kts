@@ -1,14 +1,10 @@
 plugins {
     id("com.android.library")
-    // org.jetbrains.kotlin.android is applied below in the body, not here.
-    // During generatePrecompiledScriptPluginAccessors, the synthetic project inherits
-    // kotlin-jvm from buildSrc's kotlin-dsl. Putting kotlin-android in plugins {}
-    // causes a name conflict on the 'kotlin' extension. Body code is not executed
-    // during accessor generation, so applying it here is safe.
+    // AGP 9.2 auto-applies org.jetbrains.kotlin.android synchronously when
+    // com.android.library is applied, so no explicit KGP application is needed.
+    // Adding it to plugins{} would conflict with either the auto-apply (in real builds)
+    // or the kotlin-jvm from buildSrc's kotlin-dsl (during accessor generation).
 }
-
-// Must run before ivy.hilt and ivy.kotlinx-serialization are applied by ivy.module.
-pluginManager.apply("org.jetbrains.kotlin.android")
 
 val javaVersion = catalog.version("jvm-target")
 

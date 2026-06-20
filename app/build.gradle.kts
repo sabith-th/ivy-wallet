@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
-    // org.jetbrains.kotlin.android applied below; see ivy.kotlin-android.gradle.kts comment
+    // AGP 9.2 auto-applies org.jetbrains.kotlin.android when com.android.application
+    // is applied; an explicit declaration here would conflict with that auto-apply.
     org.jetbrains.kotlin.plugin.compose
     id("dagger.hilt.android.plugin")
     id("org.jetbrains.kotlin.plugin.serialization")
@@ -9,8 +10,6 @@ plugins {
     id("com.google.firebase.crashlytics")
     id("io.gitlab.arturbosch.detekt")
 }
-
-pluginManager.apply("org.jetbrains.kotlin.android")
 
 android {
     namespace = "com.ivy.wallet"
