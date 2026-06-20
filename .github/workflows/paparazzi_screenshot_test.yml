@@ -33,7 +33,7 @@ jobs:
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-          git add --all "*/src/test/snapshots/"
+          git add -- ':(glob)**/src/test/snapshots/'
           if ! git diff --staged --quiet; then
             git commit -m "chore: update Paparazzi snapshots"
             git push
