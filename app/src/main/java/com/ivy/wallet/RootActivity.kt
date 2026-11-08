@@ -96,7 +96,6 @@ class RootActivity : AppCompatActivity(), RootScreen {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setupApp()
-        setupBackHandler()
         setContent {
             val viewModel: RootViewModel = viewModel()
             val isSystemInDarkTheme = isSystemInDarkTheme()
@@ -156,25 +155,36 @@ class RootActivity : AppCompatActivity(), RootScreen {
         }
     }
 
-    private fun setupBackHandler() {
-        onBackPressedDispatcher.addCallback(
-            this,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    if (!viewModel.isAppLocked() && navigation.onBackPressed()) return
-                    moveTaskToBack(false)
-                }
-            },
-        )
-    }
-
     private fun setupApp() {
         setupActivityForResultLaunchers()
+        setupBackNavigation()
         setupDatePicker()
         setupTimePicker()
         AddTransactionWidget.updateBroadcast(this)
         AddTransactionWidgetCompact.updateBroadcast(this)
         WalletBalanceWidgetReceiver.updateBroadcast(this)
+    }
+
+    // Since targetSdk 36 the system no longer calls Activity.onBackPressed(),
+    // so back must go through the OnBackPressedDispatcher.
+    private fun setupBackNavigation() {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    val handledInApp = !viewModel.isAppLocked() && navigation.onBackPressed()
+                    if (!handledInApp) {
+                        delegateBackToSystem()
+                    }
+                }
+
+                private fun delegateBackToSystem() {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                    isEnabled = true
+                }
+            }
+        )
     }
 
     private companion object {
