@@ -152,7 +152,7 @@ class BackupDataUseCase @Inject constructor(
             val jsonString = try {
                 extractAndReadBackupZip(backupFileUri, onProgress)
             } catch (e: Exception) {
-                fileSystem.read(backupFileUri, Charsets.UTF_16).getOrNull()
+                readJsonWithEncodingFallback(backupFileUri)
             } ?: ""
 
             importJson(jsonString, onProgress, clearCacheDir = true)
@@ -168,6 +168,14 @@ class BackupDataUseCase @Inject constructor(
         } finally {
             dataObserver.post(DataWriteEvent.AllDataChange)
         }
+    }
+
+    // Backups written by this app are UTF-16; backups from older versions may be UTF-8.
+    // Try UTF-16 first; if the result doesn't start with '{' it was mis-decoded, so retry as UTF-8.
+    private fun readJsonWithEncodingFallback(uri: Uri): String? {
+        val utf16 = fileSystem.read(uri, Charsets.UTF_16).getOrNull()
+        if (utf16 != null && utf16.trimStart().startsWith("{")) return utf16
+        return fileSystem.read(uri, Charsets.UTF_8).getOrNull()
     }
 
     private suspend fun extractAndReadBackupZip(
