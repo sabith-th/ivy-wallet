@@ -31,6 +31,7 @@ jobs:
         with:
           name: lint-release-report.html
           path: build/reports/lint/lint.html
+          retention-days: 7
 
       - name: Report lint error count
         if: always()

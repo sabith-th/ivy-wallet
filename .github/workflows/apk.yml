@@ -30,6 +30,7 @@ jobs:
         with:
           name: Ivy-Wallet-Demo.apk
           path: app/build/outputs/apk/demo/app-demo.apk
+          retention-days: 7
 
       - name: Upload APK in Telegram Group
         if: |
